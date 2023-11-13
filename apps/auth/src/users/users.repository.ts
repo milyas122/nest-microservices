@@ -26,4 +26,12 @@ export class UsersRepository {
     }
     return user;
   }
+
+  async getById(id: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new UnauthorizedException("user doesn't exist");
+    }
+    return user;
+  }
 }
