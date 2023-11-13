@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UserDocument } from './models/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -12,7 +12,18 @@ export class UsersRepository {
     @InjectModel('User') private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    return this.userModel.create({ ...createUserDto });
+  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+    return this.userModel.create({
+      ...createUserDto,
+      _id: new Types.ObjectId(),
+    });
+  }
+
+  async findOne(email: string): Promise<UserDocument> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new UnauthorizedException("user doesn't exist");
+    }
+    return user;
   }
 }
