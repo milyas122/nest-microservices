@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, map } from 'rxjs';
 import { AUTH_SERVICE } from '../constants/services.constant';
 
 export class JwtAuthGuard implements CanActivate {
@@ -25,12 +25,11 @@ export class JwtAuthGuard implements CanActivate {
         Authentication: jwt,
       })
       .pipe(
-        catchError((error) => {
-          throw new UnauthorizedException();
-        }),
         tap((res) => {
           context.switchToHttp().getRequest().user = res;
         }),
+        map(() => true),
+        catchError(() => of(false)),
       );
   }
 }
